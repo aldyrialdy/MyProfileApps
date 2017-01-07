@@ -20,7 +20,12 @@ public class MainActivity extends AppCompatActivity {
     ImageView personalPic;
     Button btnTake, btnEdit;
     TextView txtName, txtWork;
-    static final int REQUEST_POFILE_DETAILS = 11;
+    static final int REQUEST_PROFILE_DETAILS = 11;
+    String name="";
+    String occupation="";
+
+    SharedPreferences mSharedPreferences;
+    SharedPreferences.Editor mEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
         personalPic = (ImageView) findViewById(R.id.imgPhoto);
         btnTake = (Button) findViewById(R.id.btnTake);
         btnEdit = (Button) findViewById(R.id.btnEdit);
+        txtName = (TextView) findViewById(R.id.txtName);
+        txtWork = (TextView) findViewById(R.id.txtWork);
+
 
         btnTake.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,9 +49,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this,EditProfileActivity.class);
-                startActivityForResult(intent, REQUEST_POFILE_DETAILS);
+                intent.putExtra("name",txtName.getText().toString());
+                intent.putExtra("occupation",txtWork.getText().toString());
+                startActivityForResult(intent, REQUEST_PROFILE_DETAILS);
             }
         });
+
+        mSharedPreferences = getSharedPreferences("pref", MODE_PRIVATE);
+        String name = mSharedPreferences.getString("name","");
+        String occupation = mSharedPreferences.getString("occupation","");
+        txtName.setText(name);
+        txtWork.setText(occupation);
     }
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -62,5 +78,21 @@ public class MainActivity extends AppCompatActivity {
             Bitmap imageBitmap = (Bitmap) extras.get("data"); // assign the data, which is a picture to a variable
             personalPic.setImageBitmap(imageBitmap); // applying the picture into an ImageView
         }
+        else if (requestCode==REQUEST_PROFILE_DETAILS) {
+            name = data.getStringExtra("name");
+            occupation = data.getStringExtra("occupation");
+
+            txtName.setText(name);
+            txtWork.setText(occupation);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mEditor = mSharedPreferences.edit();
+        mEditor.putString("name", txtName.getText().toString());
+        mEditor.putString("occupation", txtWork.getText().toString());
+        mEditor.apply();
     }
 }
